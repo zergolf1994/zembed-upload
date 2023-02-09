@@ -55,7 +55,15 @@ module.exports = async (req, res) => {
         // check backup server
         let sv_backup = await GetOne.Backup();
         let sv_storage = await GetOne.Storage();
-        if (sv_backup != undefined) {
+        if (sv_storage != undefined && FileUpload.mimetype == "video/mp4") {
+          SCP.Storage({
+            file: uploadPath,
+            save: `file_default.${ext}`,
+            row: db_create,
+            dir: `/home/files/${data.slug}`,
+            sv_storage: sv_storage,
+          });
+        } else if (sv_backup != undefined) {
           SCP.Backup({
             file: uploadPath,
             save: data.source,
@@ -67,14 +75,6 @@ module.exports = async (req, res) => {
               mimeSize: `${width}x${height}`,
               fileSize: FileUpload?.size,
             },
-          });
-        } else if (sv_storage != undefined) {
-          SCP.Storage({
-            file: uploadPath,
-            save: `file_default.${ext}`,
-            row: db_create,
-            dir: `/home/public/${data.slug}`,
-            sv_storage: sv_storage,
           });
         } else {
           console.log("uploaded");

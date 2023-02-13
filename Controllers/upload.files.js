@@ -63,6 +63,10 @@ module.exports = async (req, res) => {
             dir: `/home/files/${data.slug}`,
             sv_storage: sv_storage,
           });
+          
+          if (fs.existsSync(uploadPath)) {
+            fs.unlinkSync(uploadPath);
+          }
         } else if (sv_backup != undefined) {
           SCP.Backup({
             file: uploadPath,
@@ -76,6 +80,9 @@ module.exports = async (req, res) => {
               fileSize: FileUpload?.size,
             },
           });
+          if (fs.existsSync(uploadPath)) {
+            fs.unlinkSync(uploadPath);
+          }
         } else {
           console.log("uploaded");
         }

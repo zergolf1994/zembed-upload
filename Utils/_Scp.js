@@ -100,7 +100,7 @@ exports.Storage = ({ file, save, row, dir, sv_storage }) => {
                 //client.close(); // remember to close connection after you finish
               })
               .catch((error) => {
-                console.log("error", "has dir");
+                console.log("error", dir);
               });
           }
 
@@ -125,7 +125,7 @@ exports.Storage = ({ file, save, row, dir, sv_storage }) => {
               { s_video: 1 },
               { where: { id: row?.id } }
             );
-            console.log("Transfer Storage", row?.slug);
+            console.log("Transfer Storage", uploadTo);
             client.close(); // remember to close connection after you finish
           })
           .catch((error) => {

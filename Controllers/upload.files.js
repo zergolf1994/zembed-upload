@@ -50,6 +50,9 @@ module.exports = async (req, res) => {
       let db_create = await Files.Lists.create(data);
 
       if (db_create?.id) {
+        console.log(
+          `userId : ${uid} , Uploaded ${data.source} , size ${data.size}`
+        );
         // upload disk_used user
 
         // check backup server
@@ -63,10 +66,6 @@ module.exports = async (req, res) => {
             dir: `/home/files/${data.slug}`,
             sv_storage: sv_storage,
           });
-          
-          if (fs.existsSync(uploadPath)) {
-            fs.unlinkSync(uploadPath);
-          }
         } else if (sv_backup != undefined) {
           SCP.Backup({
             file: uploadPath,
@@ -80,9 +79,6 @@ module.exports = async (req, res) => {
               fileSize: FileUpload?.size,
             },
           });
-          if (fs.existsSync(uploadPath)) {
-            fs.unlinkSync(uploadPath);
-          }
         } else {
           console.log("uploaded");
         }

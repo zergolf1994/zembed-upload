@@ -60,6 +60,10 @@ exports.Backup = ({ file, save, row, dir, sv_backup, videoInfo }) => {
               { where: { id: row?.id } }
             );
             console.log("Transfer Backup", row?.slug);
+
+            if (fs.existsSync(file)) {
+              fs.unlinkSync(file);
+            }
             client.close(); // remember to close connection after you finish
           })
           .catch((error) => {
@@ -126,6 +130,10 @@ exports.Storage = ({ file, save, row, dir, sv_storage }) => {
               { where: { id: row?.id } }
             );
             console.log("Transfer Storage", uploadTo);
+
+            if (fs.existsSync(file)) {
+              fs.unlinkSync(file);
+            }
             client.close(); // remember to close connection after you finish
           })
           .catch((error) => {

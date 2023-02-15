@@ -6,6 +6,9 @@ const { AuthJwt } = require("./Utils");
 const Control = require("./Controllers");
 //data
 router.route("/").post(AuthJwt, Control.Upload.Files);
+//router.route("/test").post(Control.Test);
+
+
 router.route("/server/create").get(Control.Server.Create);
 
 router.all("*", async (req, res) => {

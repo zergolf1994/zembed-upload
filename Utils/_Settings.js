@@ -17,7 +17,6 @@ module.exports = async (attr = []) => {
         }
       }
     }
-
     return data;
   } catch (error) {
     return;

@@ -1,8 +1,6 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("./conn");
 
-//quality 99 = original file , 18 = 360 , 22 = 720 , 37 = 1080
-
 const Lists = sequelize.define(
   "files",
   {
@@ -11,7 +9,7 @@ const Lists = sequelize.define(
       primaryKey: true,
       autoIncrement: true,
     },
-    uid: {
+    userId: {
       type: DataTypes.INTEGER(11),
     },
     active: {
@@ -22,10 +20,6 @@ const Lists = sequelize.define(
       type: DataTypes.STRING(255),
       defaultValue: "",
       allowNull: false,
-    },
-    e_code: {
-      type: DataTypes.INTEGER(3),
-      defaultValue: 0,
     },
     title: {
       type: DataTypes.TEXT,
@@ -53,6 +47,10 @@ const Lists = sequelize.define(
       type: DataTypes.INTEGER(11),
       defaultValue: 0,
     },
+    e_code: {
+      type: DataTypes.INTEGER(3),
+      defaultValue: 0,
+    },
     s_backup: {
       type: DataTypes.TINYINT(1),
       defaultValue: 0,
@@ -64,6 +62,17 @@ const Lists = sequelize.define(
     s_convert: {
       type: DataTypes.TINYINT(1),
       defaultValue: 0,
+    },
+    s_thumbs: {
+      type: DataTypes.TINYINT(1),
+      defaultValue: 0,
+    },
+    s_done: {
+      type: DataTypes.TINYINT(1),
+      defaultValue: 0,
+    },
+    viewedAt: {
+      type: DataTypes.DATE,
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -85,18 +94,42 @@ const Lists = sequelize.define(
     ],
   }
 );
-const Videos = sequelize.define(
-  "files_video",
+const Datas = sequelize.define(
+  "files_data",
   {
     active: {
       type: DataTypes.TINYINT(1),
-      defaultValue: 1,
+      defaultValue: 0,
     },
-    quality: {
+    type: {
+      type: DataTypes.STRING(255),
+      defaultValue: "",
+    },
+    name: {
       type: DataTypes.STRING(20),
       defaultValue: "",
     },
+    value: {
+      type: DataTypes.STRING(255),
+      defaultValue: "",
+    },
+    mimetype: {
+      type: DataTypes.STRING(255),
+      defaultValue: "",
+    },
+    mimesize: {
+      type: DataTypes.STRING(255),
+      defaultValue: "",
+    },
+    size: {
+      type: DataTypes.BIGINT(255),
+      defaultValue: 0,
+    },
     storageId: {
+      type: DataTypes.INTEGER(11),
+      defaultValue: 0,
+    },
+    userId: {
       type: DataTypes.INTEGER(11),
       defaultValue: 0,
     },
@@ -106,87 +139,15 @@ const Videos = sequelize.define(
     indexes: [
       {
         unique: false,
-        fields: ["quality"],
+        fields: ["type"],
+      },
+      {
+        unique: false,
+        fields: ["name"],
       },
       {
         unique: false,
         fields: ["storageId"],
-      },
-      {
-        unique: false,
-        fields: ["fileId"],
-      },
-    ],
-  }
-);
-const Backups = sequelize.define(
-  "files_backup",
-  {
-    type: {
-      type: DataTypes.STRING(255),
-      defaultValue: "",
-      allowNull: false,
-    },
-    quality: {
-      type: DataTypes.STRING(20),
-      defaultValue: "",
-    },
-    source: {
-      type: DataTypes.STRING(255),
-      defaultValue: "",
-      allowNull: false,
-    },
-    mimeType: {
-      type: DataTypes.STRING(100),
-      defaultValue: "",
-    },
-    mimeSize: {
-      type: DataTypes.STRING(20),
-      defaultValue: "",
-    },
-    fileSize: {
-      type: DataTypes.BIGINT(255),
-      defaultValue: 0,
-    },
-  },
-  {
-    timestamps: false,
-    indexes: [
-      {
-        unique: false,
-        fields: ["quality"],
-      },
-      {
-        unique: false,
-        fields: ["fileId"],
-      },
-    ],
-  }
-);
-const Subtitles = sequelize.define(
-  "files_subtitle",
-  {
-    active: {
-      type: DataTypes.TINYINT(1),
-      defaultValue: 1,
-    },
-    lang: {
-      type: DataTypes.STRING(255),
-      defaultValue: "",
-      allowNull: false,
-    },
-    source: {
-      type: DataTypes.STRING(255),
-      defaultValue: "",
-      allowNull: false,
-    },
-  },
-  {
-    timestamps: false,
-    indexes: [
-      {
-        unique: false,
-        fields: ["lang"],
       },
       {
         unique: false,
@@ -220,12 +181,17 @@ const Sets = sequelize.define(
     ],
   }
 );
+
+Lists.hasMany(Sets, { as: "sets" });
+Sets.belongsTo(Lists);
+
+Lists.hasMany(Datas, { as: "datas" });
+Datas.belongsTo(Lists);
+
 (async () => {
   await Lists.sync({ force: false });
-  await Videos.sync({ force: false });
-  await Backups.sync({ force: false });
-  await Subtitles.sync({ force: false });
+  await Datas.sync({ force: false });
   await Sets.sync({ force: false });
 })();
 
-module.exports = { Lists, Videos, Backups, Subtitles, Sets };
+module.exports = Server = { Lists, Datas, Sets };

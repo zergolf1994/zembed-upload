@@ -11,7 +11,14 @@ const ProxyCache = sequelize.define(
     value: {
       type: DataTypes.TEXT("long"),
     },
+    token: {
+      type: DataTypes.STRING(255),
+      defaultValue: "",
+    },
     fileId: {
+      type: DataTypes.INTEGER(11),
+    },
+    userId: {
       type: DataTypes.INTEGER(11),
     },
   },
@@ -24,7 +31,15 @@ const ProxyCache = sequelize.define(
       },
       {
         unique: false,
+        fields: ["token"],
+      },
+      {
+        unique: false,
         fields: ["fileId"],
+      },
+      {
+        unique: false,
+        fields: ["userId"],
       },
     ],
   }

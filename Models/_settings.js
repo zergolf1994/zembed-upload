@@ -18,7 +18,7 @@ const Settings = sequelize.define(
       {
         unique: false,
         fields: ["name"],
-      }
+      },
     ],
   }
 );

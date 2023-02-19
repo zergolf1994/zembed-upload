@@ -13,6 +13,7 @@ const app = express();
 // Global
 global.dir = __dirname;
 global.limitUpload = 1024 * 1024 * 1024 * 5;
+global.dirPublic = path.join(global.dir, "public");
 global.dirUpload = path.join(global.dir, "public/upload");
 
 app.use(
@@ -33,13 +34,15 @@ app.use(
     parameterLimit: 1000000,
   })
 );
-
+if (!fs.existsSync(path.join(global.dir, ".temp")))
+  fs.mkdirSync(path.join(global.dir, ".temp"));
+  
 app.use(
   fileUpload({
-    useTempFiles : true,
-    tempFileDir : path.join(global.dir, "public"),
+    useTempFiles: true,
+    tempFileDir: path.join(global.dir, ".temp"),
     limits: { fileSize: global.limitUpload },
-    abortOnLimit: true
+    abortOnLimit: true,
   })
 );
 app.options("*", (req, res, next) => res.end());

@@ -1,24 +1,18 @@
 "use strict";
 
 module.exports = {
+  GetIP: require("./_Get_IP"),
+  GetHN: require("./_Get_HN"),
+  CheckDisk: require("./_CheckDisk"),
   Generate: require("./_Generate"),
-  AuthJwt: require("./_AuthJwt"),
-  Alert: require("./_Alert"),
-  AllowSource: require("./_Allow_Source"),
-  Pagination: require("./_Pagination"),
-  Get_Settings: require("./_Get_Settings"),
-  Google: {
-    Auth: require("./_GoogleAuth"),
-  },
-  Proxy: {
-    Google: require("./_Proxy_Google"),
-    Cache: require("./_Proxy_Cache"),
-  },
-  Get_Video_Data: require("./_Get_Video_data"),
-  SCP: require("./_Scp"),
-  GetOne: {
-    Backup: require("./_Get_Backup"),
-    Storage: require("./_Get_Storage"),
-  },
-  CheckDisk: require("./_Check_Disk"),
+  AuthJwt: require("./_AuthJWT"),
+  //Google: require("./_Google"),
+  //Allow: require("./_Allow"),
+  //Proxy: require("./_Proxy"),
+  getSets: require("./_Settings"),
+  //Pagination: require("./_Pagination"),
+  //Search: require("./_Search"),
+  TimeSleep: require("./_TimeSleep"),
+  VideoData: require("./__VideoData"),
+  GetServer: require("./_Get_Server"),
 };

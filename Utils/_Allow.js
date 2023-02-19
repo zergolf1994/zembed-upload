@@ -1,6 +1,6 @@
 "use strict";
 
-module.exports = (source) => {
+exports.Files = (source) => {
   try {
     const matchGoogleDrive =
       /(?:https?:\/\/)?(?:[\w\-]+\.)*(?:drive|docs)\.google\.com\/(?:(?:folderview|open|uc)\?(?:[\w\-\%]+=[\w\-\%]*&)*id=|(?:folder|file|document|presentation)\/d\/|spreadsheet\/ccc\?(?:[\w\-\%]+=[\w\-\%]*&)*key=)([\w\-]{28,})/i;
@@ -15,7 +15,7 @@ module.exports = (source) => {
     } else if (matchMP4.test(source)) {
       const match = source.match(matchMP4);
       setData.title = match[1];
-      setData.type = "direct";
+      setData.type = "linkmp4";
       setData.source = source;
     } else {
       setData.status = false;

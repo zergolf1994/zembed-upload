@@ -2,26 +2,60 @@
 const fs = require("fs-extra");
 const path = require("path");
 const mime = require("mime-types");
-const { Generate } = require(`../Utils`);
+const shell = require("shelljs");
+const request = require("request");
+
+const { Files, Storages } = require(`../Models`);
+const { Generate, GetServer } = require(`../Utils`);
+const { Op } = require("sequelize");
+const { Client } = require("node-scp");
 
 module.exports = async (req, res) => {
   try {
-    let FileUpload = req?.files?.video;
+    let { uid } = req.user;
 
+    let FileUpload = req?.files?.video;
     FileUpload.name = Buffer.from(FileUpload.name, "latin1").toString("utf8");
 
     if (FileUpload.size > global.limitUpload) {
       return res.status(413).end();
     }
     let data = {
-      slug: await Generate.FileSlug(),
+      slug: await Generate.Token(),
     };
     const ext = mime.extension(FileUpload.mimetype);
 
-    if (!fs.existsSync(global.dirUpload)) fs.mkdirSync(global.dirUpload);
+    if (!fs.existsSync(global.dirPublic)) fs.mkdirSync(global.dirPublic);
 
-    let uploadPath = path.join(global.dirUpload, `${data.slug}.${ext}`);
+    let uploadPath = path.join(global.dirPublic, `${data.slug}.${ext}`);
     FileUpload.mv(uploadPath, async function (err) {
+      if (!uid) {
+        fs.unlinkSync(uploadPath);
+        return res.status(403).json({ status: false, msg: "not_allowed" });
+      }
+
+      let sv_storage = await GetServer.Storage();
+      if (!sv_storage) {
+        fs.unlinkSync(uploadPath);
+        return res.status(403).json({ status: false, msg: "storage_busy" });
+      }
+      let create_data = {
+        userId: uid,
+        title: FileUpload.name,
+        type: "upload",
+        size: FileUpload?.size,
+        s_video: 1,
+        slug: await Generate.file_slug(),
+      };
+      // remote to storage
+      await RemoteToStorage({
+        file: uploadPath,
+        save: `file_default.${ext}`,
+        dir: `/home/files/${create_data.slug}`,
+        sv_storage: sv_storage,
+        create_data,
+      });
+
       return res.status(200).json({ status: true, data });
     });
   } catch (error) {
@@ -29,3 +63,82 @@ module.exports = async (req, res) => {
     return res.status(403).json({ status: false });
   }
 };
+
+function RemoteToStorage({ file, save, dir, sv_storage, create_data }) {
+  return new Promise(function (resolve, reject) {
+    let server = {
+      host: sv_storage?.sv_ip,
+      port: sv_storage?.port,
+      username: sv_storage?.username,
+      password: sv_storage?.password,
+    };
+    if (!create_data) {
+      reject();
+    }
+    Client(server)
+      .then(async (client) => {
+        let uploadTo = save;
+        if (dir) {
+          const dir_exists = await client
+            .exists(dir)
+            .then((result) => {
+              return result;
+            })
+            .catch((error) => {
+              return false;
+            });
+
+          if (!dir_exists) {
+            await client
+              .mkdir(dir)
+              .then((response) => {
+                console.log("dir created", dir);
+              })
+              .catch((error) => {
+                reject();
+              });
+          }
+          uploadTo = `${dir}/${save}`;
+        }
+
+        await client
+          .uploadFile(file, uploadTo)
+          .then(async (response) => {
+            let db_create = await Files.Lists.create(create_data);
+            if (db_create?.id) {
+              let file_data = {
+                active: 1,
+                type: "video",
+                name: "default",
+                value: save,
+                fileId: db_create?.id,
+                storageId: sv_storage?.id,
+                userId: db_create?.userId,
+              };
+
+              await Files.Datas.create({ ...file_data });
+              fs.unlinkSync(file);
+            }
+            // check disk
+            request(
+              { url: `http://${sv_storage?.sv_ip}/check-disk` },
+              function (error, response, body) {
+                console.log("check_disk", sv_storage?.sv_ip);
+              }
+            );
+            client.close();
+            resolve(true);
+          })
+          .catch((error) => {
+            console.log("error", error);
+            client.close();
+            reject();
+          });
+      })
+      .catch((e) => {
+        console.log("e", e);
+        client.close();
+        reject();
+      });
+  });
+}

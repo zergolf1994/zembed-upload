@@ -87,10 +87,61 @@ const Sets = sequelize.define(
     ],
   }
 );
+const Advert = sequelize.define(
+  "player-advert",
+  {
+    name: {
+      type: DataTypes.STRING(255),
+      defaultValue: "",
+    },
+    offset: {
+      type: DataTypes.STRING(255),
+      defaultValue: "",
+    },
+    skip: {
+      type: DataTypes.INTEGER(3),
+      defaultValue: 0,
+    },
+    media: {
+      type: DataTypes.TEXT,
+      defaultValue: "",
+    },
+    link: {
+      type: DataTypes.TEXT,
+      defaultValue: "",
+    },
+    position: {
+      type: DataTypes.INTEGER(3),
+      defaultValue: 0,
+    },
+    playerId: {
+      type: DataTypes.INTEGER(11),
+    },
+  },
+  {
+    timestamps: false,
+    indexes: [
+      {
+        unique: false,
+        fields: ["position"],
+      },
+      {
+        unique: false,
+        fields: ["playerId"],
+      },
+    ],
+  }
+);
+Lists.hasMany(Sets, { as: "sets" });
+Sets.belongsTo(Lists);
+
+Lists.hasMany(Advert, { as: "adverts" });
+Advert.belongsTo(Lists);
 
 (async () => {
   await Lists.sync({ force: false });
   await Sets.sync({ force: false });
+  await Advert.sync({ force: false });
 })();
 
-module.exports = { Lists, Sets };
+module.exports = Player = { Lists, Sets, Advert };

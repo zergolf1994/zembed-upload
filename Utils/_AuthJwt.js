@@ -9,20 +9,19 @@ const verifyToken = async (req, res, next) => {
   try {
     if (!token) {
       req.user = {
-        error: "A token is required for authentication.",
+        error: "required_token",
       };
     } else {
       const data = jwt.verify(token, process.env.JWT_TOKEN_KEY);
       //เช็ค ระงับใช้งาน
-      
+
       //เช็ค ตัดออกจากระบบ
       req.user = { ...data };
     }
   } catch (err) {
     req.user = {
-      error: "Invalid Token.",
+      error: "invalid_token",
     };
-    //return res.json({ status: false, msg: "Invalid Token." });
   }
   return next();
 };

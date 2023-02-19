@@ -4,7 +4,7 @@ const queryString = require("query-string");
 const { GAuth } = require(`../Models`);
 const { Sequelize, Op } = require("sequelize");
 
-exports.Retoken = async ({ client_id, client_secret, refresh_token }) => {
+exports.GRetoken = async ({ client_id, client_secret, refresh_token }) => {
   try {
     const data_reload = {
       client_id,
@@ -27,7 +27,7 @@ exports.Retoken = async ({ client_id, client_secret, refresh_token }) => {
     return;
   }
 };
-exports.Data = async ({ where }) => {
+exports.GData = async ({ where }) => {
   try {
     if (!where) return;
     let row = await GAuth.findOne({
@@ -43,7 +43,7 @@ exports.Data = async ({ where }) => {
     return;
   }
 };
-exports.Rand = async ({ userId }) => {
+exports.GRand = async ({ userId }) => {
   try {
     let where = {
         userId,
@@ -74,7 +74,7 @@ exports.Rand = async ({ userId }) => {
     let token = JSON.parse(row?.token);
 
     if (timenow - timetoken > 3500) {
-      token = await this.Retoken(row);
+      token = await this.GRetoken(row);
 
       let data = {};
       if (token?.error) {
@@ -100,44 +100,41 @@ exports.Rand = async ({ userId }) => {
 exports.Source = async (file) => {
   try {
     if (!file) return;
-
     const data = {};
     const url = `https://docs.google.com/get_video_info?docid=${file?.source}`;
-    let headers = {};
+    let headers = {},
+      proxy;
 
-    let token = await this.Rand({ userId: file?.uid });
+    let token = await this.GRand({ userId: file?.userId });
 
     if (token) {
       headers.Authorization = `${token?.token_type} ${token?.access_token}`;
     }
+    if (process.env.PROXY) {
+      proxy = `${process.env.PROXY}`;
+    }
 
     return new Promise(function (resolve, reject) {
-      request(
-        {
-          url,
-          proxy: "http://qjqkvcqd-rotate:72gpvbukvn4v@p.webshare.io:80",
-          headers,
-        },
-        function (error, response, body) {
-          if (!error && response.statusCode == 200) {
-            const parsed = queryString.parse(body);
-            data.status = parsed.status;
-            if (parsed.status == "ok") {
-              data.title = parsed.title;
-              if (parsed.fmt_stream_map) {
-                const fmt_stream_map = parsed.fmt_stream_map.split(",");
-                fmt_stream_map.forEach((k, i) => {
-                  const [q, link] = k.split("|");
-                  const size = q
-                    .toString()
-                    .replace(37, 1080)
-                    .replace(22, 720)
-                    .replace(59, 480)
-                    .replace(18, 360);
-                  if (link) {
-                    data[size] = link;
-                  }
-                  /*if (size == 1080) {
+      request({ url, proxy, headers }, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+          const parsed = queryString.parse(body);
+          data.status = parsed.status;
+          if (parsed.status == "ok") {
+            data.title = parsed.title;
+            if (parsed.fmt_stream_map) {
+              const fmt_stream_map = parsed.fmt_stream_map.split(",");
+              fmt_stream_map.forEach((k, i) => {
+                const [q, link] = k.split("|");
+                const size = q
+                  .toString()
+                  .replace(37, 1080)
+                  .replace(22, 720)
+                  .replace(59, 480)
+                  .replace(18, 360);
+                if (link) {
+                  data[size] = link;
+                }
+                /*if (size == 1080) {
                     data["1080"] = link;
                   }
                   if (size == 720) {
@@ -149,21 +146,20 @@ exports.Source = async (file) => {
                   if (size == 360) {
                     data.file_360 = link;
                   }*/
-                });
-              }
-              data.cookie = JSON.stringify(response.headers["set-cookie"]);
-              data.timestamp = Date.now();
-            } else {
-              data.error_code = parsed.errorcode;
-              data.error_text = parsed.reason;
-              //console.log(parsed)
+              });
             }
+            data.cookie = JSON.stringify(response.headers["set-cookie"]);
+            data.timestamp = Date.now();
           } else {
-            data.status = false;
+            data.error_code = parsed.errorcode;
+            data.error_text = parsed.reason;
+            //console.log(parsed)
           }
-          resolve(data);
+        } else {
+          data.status = false;
         }
-      );
+        resolve(data);
+      });
     });
   } catch (error) {
     console.error(error);

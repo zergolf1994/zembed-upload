@@ -9,15 +9,15 @@ const Lists = sequelize.define(
       primaryKey: true,
       autoIncrement: true,
     },
-    uid: {
+    userId: {
       type: DataTypes.INTEGER(11),
       defaultValue: 0,
     },
     active: {
       type: DataTypes.TINYINT(1),
-      defaultValue: 1,
+      defaultValue: 0,
     },
-    status: {
+    work: {
       type: DataTypes.TINYINT(1),
       defaultValue: 0,
     },
@@ -92,9 +92,12 @@ const Sets = sequelize.define(
   }
 );
 
+Lists.hasMany(Sets, { as: "sets" });
+Sets.belongsTo(Lists);
+
 (async () => {
   await Lists.sync({ force: false });
   await Sets.sync({ force: false });
 })();
 
-module.exports = { Lists, Sets };
+module.exports = Storage = { Lists, Sets };

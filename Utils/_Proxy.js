@@ -1,8 +1,7 @@
 "use strict";
-const { Files, ProxyCache } = require(`../Models`);
-const GoogleAuth = require(`./_GoogleAuth`);
+const GoogleAuth = require(`./_Google`);
 
-module.exports = async (data) => {
+exports.Google = async (data) => {
   try {
     let google_data = await GoogleAuth.Source(data);
     return google_data;

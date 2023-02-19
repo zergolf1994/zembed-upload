@@ -5,7 +5,7 @@ module.exports = {
   GetHN: require("./_Get_HN"),
   CheckDisk: require("./_CheckDisk"),
   Generate: require("./_Generate"),
-  AuthJwt: require("./_AuthJWT"),
+  AuthJwt: require("./_AuthJWT2"),
   //Google: require("./_Google"),
   //Allow: require("./_Allow"),
   //Proxy: require("./_Proxy"),

@@ -6,7 +6,7 @@ const shell = require("shelljs");
 const request = require("request");
 
 const { Files, Storages } = require(`../Models`);
-const { Generate, GetServer } = require(`../Utils`);
+const { Generate, GetServer, VideoData } = require(`../Utils`);
 const { Op } = require("sequelize");
 const { Client } = require("node-scp");
 
@@ -21,7 +21,7 @@ module.exports = async (req, res) => {
       return res.status(413).end();
     }
     let data = {
-      slug: await Generate.Token(),
+      slug: await Generate.file_slug(),
     };
     const ext = mime.extension(FileUpload.mimetype);
 
@@ -39,13 +39,17 @@ module.exports = async (req, res) => {
         fs.unlinkSync(uploadPath);
         return res.status(403).json({ status: false, msg: "storage_busy" });
       }
+      let vdo_ = await VideoData(uploadPath);
+      let { width, height, duration } = vdo_?.streams[0];
+
       let create_data = {
         userId: uid,
         title: FileUpload.name,
         type: "upload",
         size: FileUpload?.size,
         s_video: 1,
-        slug: await Generate.file_slug(),
+        duration: duration.toFixed(0) || 0,
+        slug: data.slug,
       };
       // remote to storage
       await RemoteToStorage({
@@ -115,7 +119,6 @@ function RemoteToStorage({ file, save, dir, sv_storage, create_data }) {
                 storageId: sv_storage?.id,
                 userId: db_create?.userId,
               };
-
               await Files.Datas.create({ ...file_data });
               fs.unlinkSync(file);
             }
@@ -126,6 +129,7 @@ function RemoteToStorage({ file, save, dir, sv_storage, create_data }) {
                 console.log("check_disk", sv_storage?.sv_ip);
               }
             );
+
             client.close();
             resolve(true);
           })

@@ -1,9 +1,6 @@
 module.exports = {
-  Upload: {
-    Files: require("./upload.files"),
-  },
   Server: {
     Create: require("./server.create"),
   },
-  Test:require("./test")
+  UploadV1:require("./upload_v1")
 };

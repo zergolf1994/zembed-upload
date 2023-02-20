@@ -6,7 +6,7 @@ const shell = require("shelljs");
 const request = require("request");
 
 const { Files, Storages } = require(`../Models`);
-const { Generate, GetServer, VideoData } = require(`../Utils`);
+const { Generate, GetServer, VideoData, getSets } = require(`../Utils`);
 const { Op } = require("sequelize");
 const { Client } = require("node-scp");
 
@@ -69,7 +69,8 @@ module.exports = async (req, res) => {
 };
 
 function RemoteToStorage({ file, save, dir, sv_storage, create_data }) {
-  return new Promise(function (resolve, reject) {
+  return new Promise(async function (resolve, reject) {
+    let sets = await getSets();
     let server = {
       host: sv_storage?.sv_ip,
       port: sv_storage?.port,
@@ -124,9 +125,17 @@ function RemoteToStorage({ file, save, dir, sv_storage, create_data }) {
             }
             // check disk
             request(
-              { url: `http://${sv_storage?.sv_ip}/check-disk` },
+              { url: `http://${sv_storage?.sv_ip}/cron/check-disk` },
               function (error, response, body) {
-                console.log("check_disk", sv_storage?.sv_ip);
+                console.log("cron-check", sv_storage?.sv_ip);
+              }
+            );
+
+            // thumbs
+            request(
+              { url: `http://${sets?.domain_api_admin}/cron/thumbs` },
+              function (error, response, body) {
+                console.log("cron-thumbs", sets?.domain_api_admin);
               }
             );
 

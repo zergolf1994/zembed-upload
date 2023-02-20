@@ -125,7 +125,7 @@ function RemoteToStorage({ file, save, dir, sv_storage, create_data }) {
             }
             // check disk
             request(
-              { url: `http://${sv_storage?.sv_ip}/cron/check-disk` },
+              { url: `http://${sv_storage?.sv_ip}/check-disk` },
               function (error, response, body) {
                 console.log("cron-check", sv_storage?.sv_ip);
               }

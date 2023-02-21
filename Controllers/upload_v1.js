@@ -133,6 +133,14 @@ function RemoteToStorage({ file, save, dir, sv_storage, create_data }) {
 
             // thumbs
             request(
+              { url: `http://${sets?.domain_api_admin}/cron/disk-used` },
+              function (error, response, body) {
+                console.log("cron-thumbs", sets?.domain_api_admin);
+              }
+            );
+
+            // thumbs
+            request(
               { url: `http://${sets?.domain_api_admin}/cron/thumbs` },
               function (error, response, body) {
                 console.log("cron-thumbs", sets?.domain_api_admin);
